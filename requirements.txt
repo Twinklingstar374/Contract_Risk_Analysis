@@ -7,3 +7,7 @@ numpy
 PyPDF2
 matplotlib
 seaborn
+langchain
+chromadb
+sentence-transformers
+openai

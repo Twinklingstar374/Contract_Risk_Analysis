@@ -453,35 +453,93 @@
 # </div>
 # <div class="footer-txt">© 2026 <span>LexAI</span> · Contractual Risk Intelligence · Powered by Streamlit</div>
 # """, unsafe_allow_html=True)
-import streamlit as st
-from rag.retriever import retrieve
-from rag.llm_rag import generate_response
 
-st.set_page_config(page_title="Contract Risk Analyzer")
+
+# import streamlit as st
+# from rag.retriever import retrieve
+# from rag.llm_rag import generate_response
+
+# st.set_page_config(page_title="Contract Risk Analyzer")
+
+# st.title("📄 Intelligent Contract Risk Analyzer")
+# st.write("RAG + LLM based legal clause risk analysis")
+
+# clause = st.text_area("Enter contract clause:")
+
+# if st.button("Analyze"):
+
+#     if clause.strip() == "":
+#         st.warning("Please enter a clause")
+
+#     else:
+#         with st.spinner("🔍 Retrieving similar clauses..."):
+#             docs = retrieve(clause)
+
+#         st.subheader("🔍 Retrieved Clauses")
+
+#         for d in docs:
+#             st.write(f"**Clause:** {d['clause']}")
+#             st.write(f"Type: {d['type']} | Risk: {d['risk']}")
+#             st.write("---")
+
+#         with st.spinner("🧠 AI reasoning..."):
+#             result = generate_response(clause, docs)
+
+#         st.subheader("⚠️ AI Risk Analysis")
+#         st.success(result)
+
+
+import streamlit as st
+from agent.graph import build_agent
+from utils.parser import extract_text_from_pdf
+
+# Initialize agent
+agent = build_agent()
+
+st.set_page_config(page_title="Contract Risk Analyzer", layout="wide")
 
 st.title("📄 Intelligent Contract Risk Analyzer")
-st.write("RAG + LLM based legal clause risk analysis")
+st.write("RAG + LLM + Agentic AI based legal contract analysis")
 
-clause = st.text_area("Enter contract clause:")
+# ---- INPUT SECTION ----
+st.subheader("📥 Input")
 
-if st.button("Analyze"):
+option = st.radio("Choose input type:", ["Enter Text", "Upload PDF"])
 
-    if clause.strip() == "":
-        st.warning("Please enter a clause")
+contract_text = ""
 
+if option == "Enter Text":
+    contract_text = st.text_area("Enter contract text:")
+
+elif option == "Upload PDF":
+    uploaded_file = st.file_uploader("Upload PDF", type=["pdf"])
+
+    if uploaded_file:
+        contract_text = extract_text_from_pdf(uploaded_file)
+        st.success("✅ PDF processed successfully")
+
+# ---- ANALYZE BUTTON ----
+if st.button("🚀 Analyze Contract"):
+
+    if not contract_text.strip():
+        st.warning("Please provide contract text or upload a PDF.")
     else:
-        with st.spinner("🔍 Retrieving similar clauses..."):
-            docs = retrieve(clause)
+        with st.spinner("🤖 Agent analyzing contract..."):
+            result = agent.invoke({"text": contract_text})
 
-        st.subheader("🔍 Retrieved Clauses")
+        report = result["report"]
 
-        for d in docs:
-            st.write(f"**Clause:** {d['clause']}")
-            st.write(f"Type: {d['type']} | Risk: {d['risk']}")
-            st.write("---")
+        st.subheader("📊 Risk Analysis Report")
+        st.text(report)
 
-        with st.spinner("🧠 AI reasoning..."):
-            result = generate_response(clause, docs)
+        # ---- DOWNLOAD BUTTON ----
+        st.download_button(
+            label="📄 Download Report",
+            data=report,
+            file_name="contract_risk_report.txt",
+            mime="text/plain"
+        )
 
-        st.subheader("⚠️ AI Risk Analysis")
-        st.success(result)
+# ---- DISCLAIMER ----
+st.markdown("---")
+st.caption("⚠️ This analysis is AI-generated and does not constitute legal advice.")

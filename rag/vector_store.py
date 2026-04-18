@@ -1,31 +1,37 @@
 import pandas as pd
 from sentence_transformers import SentenceTransformer
 import chromadb
+from chromadb.config import Settings
 
 # Load dataset
 df = pd.read_csv("Data/legal_contract_clauses.csv")
 
-print(df.columns)
-
-# Correct column name
 clauses = df["clause_text"].tolist()
 
 # Load embedding model
 model = SentenceTransformer("all-MiniLM-L6-v2")
 
-# Generate embeddings
+# Create embeddings
 embeddings = model.encode(clauses)
 
-# Initialize ChromaDB
-client = chromadb.Client()
+# Persistent database
+client = chromadb.Client(
+    Settings(
+        persist_directory="./chroma_db",
+        anonymized_telemetry=False
+    )
+)
 
-collection = client.create_collection("legal_clauses")
+collection = client.get_or_create_collection("legal_clauses")
+
+# Clear old data (important while developing)
+collection.delete(where={})
 
 for i, clause in enumerate(clauses):
     collection.add(
+        ids=[str(i)],
         documents=[clause],
-        embeddings=[embeddings[i].tolist()],
-        ids=[str(i)]
+        embeddings=[embeddings[i].tolist()]
     )
 
-print("Vector database created successfully!")
+print(f"Stored {len(clauses)} clauses in vector database.")

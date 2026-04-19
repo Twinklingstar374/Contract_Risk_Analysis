@@ -72,6 +72,31 @@ Final Risk Report
 * No explanation or reasoning
 * No contextual understanding
 
+## 📊 Model Evaluation
+
+### 🔹 Performance Summary
+
+- **Accuracy:** 86.7%  
+- **Macro F1 Score:** ~0.86  
+- **Class Distribution:** Balanced  
+
+### 🔹 Class-wise Performance Insights
+
+- ✅ Strong performance on Low-risk (Class 0)  
+  - 745 clauses correctly classified  
+
+- ✅ Strong performance on High-risk (Class 2)  
+  - 605 clauses correctly classified  
+
+- ⚠️ Moderate confusion in Medium-risk (Class 1)  
+
+### 🔹 Key Observations
+
+- Strong performance on extreme classes  
+- Medium-risk shows overlap  
+- Reliable baseline model  
+
+
 ---
 
 ## 🚀 Milestone 2: Agentic AI + RAG System

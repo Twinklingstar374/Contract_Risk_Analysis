@@ -1,23 +1,26 @@
 from langgraph.graph import StateGraph
 from rag.retriever import retrieve
 from rag.llm_rag import generate_response
+from utils.parser import split_clauses
 
 
-# 🧠 1️⃣ Extract clauses
+# Extract clauses
 def extract_clauses(state):
     text = state["text"]
 
-    clauses = text.split(".")
-    clauses = [c.strip() for c in clauses if len(c.strip()) > 20]
+    clauses = split_clauses(text)
+
+    print("CLAUSES FOUND:", len(clauses))  # debug
 
     return {
+        "text": text,
         "clauses": clauses,
         "current_index": 0,
         "results": []
     }
 
 
-# 🔍 2️⃣ Analyze clause (RAG + LLM)
+# Analyze clause
 def analyze_clause(state):
     idx = state["current_index"]
     clause = state["clauses"][idx]
@@ -33,23 +36,23 @@ def analyze_clause(state):
     return state
 
 
-# 🔁 3️⃣ Move to next clause
+# Move next
 def next_clause(state):
     state["current_index"] += 1
     return state
 
 
-# ❓ 4️⃣ Check condition
+# Condition
 def has_more_clauses(state):
     return state["current_index"] < len(state["clauses"])
 
 
-# Generate final report
+# Report
 def generate_report(state):
     report = "\n📄 CONTRACT RISK REPORT\n\n"
 
     for r in state["results"]:
-        report += f"Clause: {r['clause']}\n"
+        report += f"Clause:\n{r['clause']}\n\n"
         report += f"{r['analysis']}\n"
         report += "-" * 50 + "\n"
 
@@ -57,7 +60,7 @@ def generate_report(state):
     return state
 
 
-#  BUILD GRAPH
+# Build graph
 def build_agent():
     graph = StateGraph(dict)
 

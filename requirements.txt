@@ -5,14 +5,13 @@ sentence-transformers
 faiss-cpu
 groq
 python-dotenv
+pypdf
 PyPDF2
 scikit-learn
 joblib
 nltk
 matplotlib
 seaborn
-streamlit
-pandas
-numpy
-scikit-learn
+plotly
 openai
+langgraph
